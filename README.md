@@ -1,5 +1,6 @@
 # Moon2FA
 Moon2FA is a simple command-line interface (CLI) tool designed to streamline your two-factor authentication (2FA) experience.
+
 ![image](https://github.com/Dorkreamer/Moon2FA/assets/124145361/705b5d5e-a838-4e34-bd69-60094c524f29)
 
 All of your keys will be stored in a file called `keys.moon`, which will be located in the same folder as the main executable and encrypted using your master password.
