@@ -15,6 +15,13 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 import datetime
 
+if getattr(sys, 'frozen', False):
+    # When the script is run as a bundled executable
+    root = os.path.dirname(sys.executable)
+else:
+    # When the script is run as a Python script
+    root = os.path.dirname(os.path.abspath(sys.argv[0]))
+
 def derive_key_from_password(password):
     """
     Derives a cryptographic key from the provided password.
@@ -33,7 +40,7 @@ def derive_key_from_password(password):
 class storage:
     @staticmethod
     def decrypt(secret):
-        with open(os.path.join(os.getcwd(), "keys.moon"), "rb") as keyfile:
+        with open(os.path.join(root, "keys.moon"), "rb") as keyfile:
             key = base64.urlsafe_b64encode(secret)
             return Fernet(key).decrypt(keyfile.read()).decode()
     
@@ -44,24 +51,24 @@ class storage:
 
     @staticmethod
     def set(secret, key, value):
-        if not os.path.exists(f"./keys.moon"):
+        if not os.path.exists(os.path.join(root, "keys.moon")):
             data = ObjDict()
         else:
             try:
                 data = ObjDict.loads(storage.decrypt(secret))
             except Exception as e:
                 print("Your keys.moon file is corrupted!!")
-                shutil.move(f"./keys.moon", f".keys_backup.moon")   # Don't wanna lose user data UwU
+                shutil.move(os.path.join(root, "keys.moon"), f".keys_backup.moon")   # Don't wanna lose user data UwU
                 data = ObjDict()
             
-        with open(f"./keys.moon", "wb") as file:
+        with open(os.path.join(root, "keys.moon"), "wb") as file:
             data[key] = value 
             data = storage.encrypt(json.dumps(data).encode(), secret)
             file.write(data)
 
     @staticmethod
     def read(secret, key):
-        if not os.path.exists(f"./keys.moon"):
+        if not os.path.exists(os.path.join(root, "keys.moon")):
             return None
         else:
             try:
@@ -72,7 +79,7 @@ class storage:
 
     @staticmethod
     def read_all(secret):
-        if not os.path.exists(f"./keys.moon"):
+        if not os.path.exists(os.path.join(root, "keys.moon")):
             return None
         else:
             try:
@@ -83,10 +90,10 @@ class storage:
 
     @staticmethod
     def remove(secret, index):
-        if not os.path.exists(f"./keys.moon"):
+        if not os.path.exists(os.path.join(root, "keys.moon")):
             return None
         else:
-            with open(f"./keys.moon", "rb+") as file:
+            with open(os.path.join(root, "keys.moon"), "rb+") as file:
                 data = json.loads(storage.decrypt(secret))
                 del data[index]
                 file.seek(0)
@@ -141,7 +148,7 @@ def setup():
 
 def main_loop():
     os.system("clear")
-    if not os.path.isfile("./keys.moon"):
+    if not os.path.isfile(os.path.join(root, "keys.moon")):
         return setup()
 
     print(f"Hello, {getpass.getuser()}! Welcome back to Moon2FA!! :3")
